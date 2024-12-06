@@ -1,7 +1,7 @@
 {
   "name": "mesto-project",
   "version": "1.0.0",
-  "description": "Работа выполнена студенткой группы 3822Б1ПР4 Колоколовой Д.А.",
+  "description": "Работа выполнена студенткой группы 3822Б1ПР4 Шуравиной О.Н.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
