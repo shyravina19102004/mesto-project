@@ -59,11 +59,23 @@ function openImagePopup(title, link) {
 // Функция для открытия поп-апа
 function openModal(popup) {
     popup.classList.add('popup_is-opened');
+    document.addEventListener('keydown', closeByEsc);
 }
 
 // Функция для закрытия поп-апа
 function closeModal(popup) {
     popup.classList.remove('popup_is-opened');
+    document.removeEventListener('keydown', closeByEsc);
+}
+
+// Функция для закрытия поп-апа по нажатию на Esc
+function closeByEsc(evt) {
+    if (evt.key === 'Escape') {
+        const openedPopup = document.querySelector('.popup_is-opened');
+        if (openedPopup) {
+            closeModal(openedPopup);
+        }
+    }
 }
 
 // Вывести карточки на страницу
@@ -81,6 +93,13 @@ closeButtons.forEach(button => {
         const popup = event.target.closest('.popup');
         closeModal(popup);
     });
+});
+
+// Обработка клика на оверлей
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('popup')) {
+        closeModal(event.target);
+    }
 });
 
 // Инициализация карточек
@@ -127,3 +146,78 @@ cardFormElement.addEventListener('submit', (evt) => {
     placesList.prepend(newCard);
     closeModal(cardPopup);
 });
+
+// Настройки валидации
+const validationSettings = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
+};
+
+// Включение валидации
+enableValidation(validationSettings);
+
+// Функция для включения валидации формы
+function enableValidation(settings) {
+  const forms = Array.from(document.querySelectorAll(settings.formSelector));
+  forms.forEach(form => {
+    setEventListeners(form, settings);
+  });
+}
+
+// Функция для установки слушателей событий
+function setEventListeners(formElement, settings) {
+  const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
+  const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+  toggleButtonState(inputList, buttonElement, settings);
+  inputList.forEach(inputElement => {
+    inputElement.addEventListener('input', () => {
+      checkInputValidity(formElement, inputElement, settings);
+      toggleButtonState(inputList, buttonElement, settings);
+    });
+  });
+}
+
+// Функция для проверки валидности поля
+function checkInputValidity(formElement, inputElement, settings) {
+  if (!inputElement.validity.valid) {
+    showInputError(formElement, inputElement, inputElement.validationMessage, settings);
+  } else {
+    hideInputError(formElement, inputElement, settings);
+  }
+}
+
+// Функция для показа ошибки
+function showInputError(formElement, inputElement, errorMessage, settings) {
+  const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
+  inputElement.classList.add(settings.inputErrorClass);
+  errorElement.textContent = errorMessage;
+  errorElement.classList.add(settings.errorClass);
+}
+
+// Функция для скрытия ошибки
+function hideInputError(formElement, inputElement, settings) {
+  const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
+  inputElement.classList.remove(settings.inputErrorClass);
+  errorElement.classList.remove(settings.errorClass);
+  errorElement.textContent = '';
+}
+
+// Функция для переключения состояния кнопки
+function toggleButtonState(inputList, buttonElement, settings) {
+  if (hasInvalidInput(inputList)) {
+    buttonElement.classList.add(settings.inactiveButtonClass);
+    buttonElement.disabled = true;
+  } else {
+    buttonElement.classList.remove(settings.inactiveButtonClass);
+    buttonElement.disabled = false;
+  }
+}
+
+// Функция для проверки наличия невалидного поля
+function hasInvalidInput(inputList) {
+  return inputList.some(inputElement => !inputElement.validity.valid);
+}
